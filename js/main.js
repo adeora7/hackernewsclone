@@ -23,48 +23,108 @@ function createNewPost(news){
     `;
     return eachNewsPost;
 }
-var all;
-var totalLeft;
+
 var app = angular.module('myApp', []);
 var seeMore = document.getElementById("seeMore");
 
+var all;
+var totalLeft;
+
 app.controller('myCtrl', function($scope, $http) {
-    $scope.fetch = function(url){
+    $scope.getMaxCount = function(){
+        var url = "https://hacker-news.firebaseio.com/v0/maxitem.json?print=pretty";
         $http.get(url)
         .then(function(response) {
+            var max = response.data;
+            all = [];
+            for(var i = 0; i< 100; i++)
+            {
+                all.push(max);
+                max = max-1;
+            }
+            totalLeft = all.length;
+            $scope.showTypeStories();
+        
+        });
+    }
+    $scope.fetchStory = function(id){
+        var url = "https://hacker-news.firebaseio.com/v0/item/"+id+".json?print=pretty";
+        $http.get(url)
+        .then(function(response) {
+            var story = response.data;
+            var newData = newData + createNewPost(story);
+            document.getElementById("allNews").innerHTML += newData;
+        
+        });
+    }
+    $scope.fetchList = function(type){
+        all = [];
+        document.getElementById("allNews").innerHTML = "Loading...";
+        var url = "https://hacker-news.firebaseio.com/v0/"+type+".json?print=pretty";
+        $http.get(url)
+        .then(function(response){
             all = response.data;
             totalLeft = all.length;
-            var allNews = document.getElementById("allNews");
-            allNews.innerHTML = "Loading...";
-            var allData = "";
-            for (var i = 0; i < 5 && totalLeft>0; i++,totalLeft--) {
-                allData += createNewPost(all[i]);
-            }
-            all.splice(0,i-1);
-            allNews.innerHTML = allData;
-            if(totalLeft <=0)
-            {
-                document.getElementById("seeMore").setAttribute("disabled","");
-            }
+            $scope.showTypeStories();
         });
+    }
+    $scope.showTypeStories = function(){
+        seeMore.setAttribute("disabled","");
+        document.getElementById("allNews").innerHTML = "";
+        let curr;
+        let i;
+        for(i = 0; i<5 && totalLeft>0; i++,totalLeft--){
+            curr = angular.element(document.getElementsByTagName('body')[0]).scope().fetchStory(all[i]);
+        }
+        console.log(i);
+        all.splice(0,i-1);
+        seeMore.disabled = false;
+        if(totalLeft <=0)
+        {
+            seeMore.setAttribute("disabled","");
+        }
     }
 });
 
 seeMore.addEventListener("click", function(){
-    var allData = "";
-    for (var i = 0; i < 5 && totalLeft>0; i++,totalLeft--) {
-        allData += createNewPost(all[i]);
+    seeMore.disabled = true;
+    let curr;
+    let i;
+    seeMore.disabled = true;
+    for(i = 0; i<5 && totalLeft>0; i++,totalLeft--){
+        curr = angular.element(document.getElementsByTagName('body')[0]).scope().fetchStory(all[i]);
     }
     all.splice(0,i-1);
-    document.getElementById("allNews").innerHTML += allData;
+    seeMore.disabled = false;
     if(totalLeft <=0)
     {
-        document.getElementById("seeMore").setAttribute("disabled","");
+        seeMore.setAttribute("disabled","");
     }
 });
 
+
 document.addEventListener('DOMContentLoaded', function () {
-    angular.element(document.getElementsByTagName('body')[0]).scope().fetch("hacker_news_stories.json");
+    var live = document.getElementById("liveStories");
+    var top = document.getElementById("topStories");
+    var newst = document.getElementById("newStories");
+    var best = document.getElementById("bestStories");
+
+    live.addEventListener('click', function(){
+        console.log("yo");
+        angular.element(document.getElementsByTagName('body')[0]).scope().getMaxCount();
+    });
+    top.addEventListener('click', function(){
+        console.log("yo");
+        angular.element(document.getElementsByTagName('body')[0]).scope().fetchList("topstories");
+    });
+
+    newst.addEventListener('click', function(){
+        angular.element(document.getElementsByTagName('body')[0]).scope().fetchList("newstories");
+    });
+
+    best.addEventListener('click', function(){
+        angular.element(document.getElementsByTagName('body')[0]).scope().fetchList("beststories");
+    });
 
   // Get all "navbar-burger" elements
   var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
