@@ -27,22 +27,27 @@ var all;
 var totalLeft;
 var app = angular.module('myApp', []);
 var seeMore = document.getElementById("seeMore");
+
 app.controller('myCtrl', function($scope, $http) {
-    $http.get("hacker_news_stories.json")
-    .then(function(response) {
-        all = response.data;
-        totalLeft = all.length;
-        var allData = "";
-        for (var i = 0; i < 5 && totalLeft>0; i++,totalLeft--) {
-            allData += createNewPost(all[i]);
-        }
-        all.splice(0,i-1);
-        document.getElementById("allNews").innerHTML = allData;
-        if(totalLeft <=0)
-        {
-            document.getElementById("seeMore").setAttribute("disabled","");
-        }
-    });
+    $scope.fetch = function(url){
+        $http.get(url)
+        .then(function(response) {
+            all = response.data;
+            totalLeft = all.length;
+            var allNews = document.getElementById("allNews");
+            allNews.innerHTML = "Loading...";
+            var allData = "";
+            for (var i = 0; i < 5 && totalLeft>0; i++,totalLeft--) {
+                allData += createNewPost(all[i]);
+            }
+            all.splice(0,i-1);
+            allNews.innerHTML = allData;
+            if(totalLeft <=0)
+            {
+                document.getElementById("seeMore").setAttribute("disabled","");
+            }
+        });
+    }
 });
 
 seeMore.addEventListener("click", function(){
@@ -59,6 +64,7 @@ seeMore.addEventListener("click", function(){
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    angular.element(document.getElementsByTagName('body')[0]).scope().fetch("hacker_news_stories.json");
 
   // Get all "navbar-burger" elements
   var $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
