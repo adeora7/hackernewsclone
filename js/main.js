@@ -52,7 +52,7 @@ app.controller('myCtrl', function($scope, $http) {
         $http.get(url)
         .then(function(response) {
             var story = response.data;
-            var newData = newData + createNewPost(story);
+            var newData = createNewPost(story);
             document.getElementById("allNews").innerHTML += newData;
         
         });
