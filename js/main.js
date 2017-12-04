@@ -1,26 +1,57 @@
+var t = new Date(1970, 0, 1);
+var t2;
 function createNewPost(news){
-    var eachNewsPost = `
-        <div class="box">
-            <article class="media">
-                 <div class="media-left">
-                    <figure class="image is-64x64">
-                        <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
-                    </figure>
-                </div>
-                <div class="media-content">
-                    <div class="content">
-                        <p>
-                            <strong>`+news.by+`</strong> <small>`+news.time+`</small>
-                            <br>
-                            <a href="`+news.url+`" class="is-underlined" target="_blank">
-                                `+news.title+`
-                            </a>
-                        </p>
+    var t2 = t;
+    t.setSeconds(news.time);
+    if(news.type == "story"){
+        var eachNewsPost = `
+            <div class="box">
+                <article class="media">
+                     <div class="media-left">
+                        <figure class="image is-64x64">
+                            <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
+                        </figure>
                     </div>
-                </div>
-            </article>
-        </div>
-    `;
+                    <div class="media-content">
+                        <div class="content">
+                            <p>
+                                <strong>`+news.by+`</strong> - <small>`+t+`</small>
+                                <br>
+                                <a href="`+news.url+`" class="is-underlined" target="_blank">
+                                    `+news.title+`
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        `;
+    }
+    else
+    {
+        var eachNewsPost = `
+            <div class="box">
+                <article class="media">
+                     <div class="media-left">
+                        <figure class="image is-64x64">
+                            <img src="https://bulma.io/images/placeholders/128x128.png" alt="Image">
+                        </figure>
+                    </div>
+                    <div class="media-content">
+                        <div class="content">
+                            <p>
+                                <strong>`+news.by+`</strong> - <small>`+t+`</small>
+                                <br>
+                                <span>
+                                    <strong>`+news.type+`</strong>: `+news.text+`
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        `;
+    }
     return eachNewsPost;
 }
 
@@ -52,9 +83,10 @@ app.controller('myCtrl', function($scope, $http) {
         $http.get(url)
         .then(function(response) {
             var story = response.data;
+            console.log(story);
             var newData = createNewPost(story);
             document.getElementById("allNews").innerHTML += newData;
-        
+            
         });
     }
     $scope.fetchList = function(type){
